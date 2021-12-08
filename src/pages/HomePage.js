@@ -1,4 +1,6 @@
+import { Grid } from '@chakra-ui/layout';
 import React, { useContext, useEffect } from 'react';
+import ProductCard from '../components/ProductCard';
 import { ShopContext } from '../contexts/ShopContextProvider';
 
 function HomePage() {
@@ -12,11 +14,11 @@ function HomePage() {
 
   return (
     <div>
-      <ul className='products-list'>
+      <Grid templateColumns='repeat(3,1fr)'>
         {products.map((product) => (
-          <h2 key={product.id}>{product.title}</h2>
+          <ProductCard product={product} key={product.id} />
         ))}
-      </ul>
+      </Grid>
     </div>
   );
 }

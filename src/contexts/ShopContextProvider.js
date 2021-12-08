@@ -14,6 +14,7 @@ export const ShopContext = React.createContext();
 export default class ShopContextProvider extends Component {
   state = {
     products: [],
+    product: {},
   };
 
   fetchAllProducts = async () => {
@@ -23,9 +24,22 @@ export default class ShopContextProvider extends Component {
     this.setState({ products });
   };
 
+  fetchProductByHandle = async (handle) => {
+    // Fetch a single product by Handle
+    const product = await client.product.fetchByHandle(handle);
+
+    this.setState({ product });
+  };
+
   render() {
     return (
-      <ShopContext.Provider value={{ ...this.state, fetchAllProducts: this.fetchAllProducts }}>
+      <ShopContext.Provider
+        value={{
+          ...this.state,
+          fetchAllProducts: this.fetchAllProducts,
+          fetchProductByHandle: this.fetchProductByHandle,
+        }}
+      >
         {this.props.children}
       </ShopContext.Provider>
     );
