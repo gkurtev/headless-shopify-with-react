@@ -17,6 +17,8 @@ function VariantOptions(props) {
     });
   };
 
+  if (!activeVariant) return <p>...TODO</p>;
+
   return (
     <Box mt='1rem'>
       {options.map((opt, index) => {
