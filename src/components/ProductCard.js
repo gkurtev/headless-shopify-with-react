@@ -10,7 +10,7 @@ function ProductCard(props) {
     <LinkBox paddingTop='50%'>
       <Box position='absolute' w='100%' h='100%' left={0} top={0}>
         <Image
-          src={product.variants[0].image.src}
+          src={product.images[0].src}
           position='absolute'
           left='0'
           top='0'

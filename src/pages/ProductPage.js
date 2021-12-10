@@ -32,6 +32,10 @@ function ProductPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product.handle]);
 
+  const colorGroups = () => {
+    console.log('TODO');
+  };
+
   if (!currentProduct) return <p>...Loading</p>;
 
   return (
@@ -42,7 +46,7 @@ function ProductPage() {
 
       <Flex>
         <Box w='50%'>
-          <Image objectFit='cover' src={currentProduct.variants[0].image.src} />
+          <Image objectFit='cover' src={currentProduct.images[0].src} />
         </Box>
 
         <Box w='50%'>

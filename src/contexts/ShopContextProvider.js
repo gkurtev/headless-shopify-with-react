@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import Client from 'shopify-buy/index.umd';
+import Client from 'shopify-buy/index.unoptimized.umd';
+import { productQuery } from '../queries';
+import { graphQlRequestProducts, graphQlRequestProductSingle } from '../graphRequests';
 
 const { REACT_APP_DOMAIN, REACT_APP_SHOPIFY_API } = process.env;
 
@@ -19,16 +21,24 @@ export default class ShopContextProvider extends Component {
 
   fetchAllProducts = async () => {
     // Fetch all products in your shop
-    const products = await client.product.fetchAll();
-
-    this.setState({ products });
+    graphQlRequestProducts(client.graphQLClient, productQuery).then((graphProducts) => {
+      const { products } = graphProducts.attrs;
+      this.setState({ products });
+    });
   };
 
   fetchProductByHandle = async (handle) => {
     // Fetch a single product by Handle
-    const product = await client.product.fetchByHandle(handle);
+    graphQlRequestProductSingle(client.graphQLClient, handle, productQuery).then((graphProduct) => {
+      const { productByHandle: product } = graphProduct.attrs;
+      this.setState({ product });
+    });
+  };
 
-    this.setState({ product });
+  updateProducts = (product) => {
+    this.setState({
+      products: this.state.products.concat(product),
+    });
   };
 
   render() {
@@ -38,6 +48,7 @@ export default class ShopContextProvider extends Component {
           ...this.state,
           fetchAllProducts: this.fetchAllProducts,
           fetchProductByHandle: this.fetchProductByHandle,
+          updateProducts: this.updateProducts,
         }}
       >
         {this.props.children}
