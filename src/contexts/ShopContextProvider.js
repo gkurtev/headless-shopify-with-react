@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
 import Client from 'shopify-buy/index.unoptimized.umd';
 import { productQuery } from '../queries';
-import { graphQlRequestProducts, graphQlRequestProductSingle } from '../graphRequests';
+import {
+  graphQlRequestCollectionByHandle,
+  graphQlRequestProducts,
+  graphQlRequestProductSingle,
+} from '../graphRequests';
 
 const { REACT_APP_DOMAIN, REACT_APP_SHOPIFY_API } = process.env;
 
@@ -20,19 +24,24 @@ export default class ShopContextProvider extends Component {
   };
 
   fetchAllProducts = async () => {
-    // Fetch all products in your shop
-    graphQlRequestProducts(client.graphQLClient, productQuery).then((graphProducts) => {
-      const { products } = graphProducts.attrs;
-      this.setState({ products });
-    });
+    const res = await graphQlRequestProducts(client.graphQLClient, productQuery);
+    const productsData = await res;
+
+    this.setState({ products: productsData.attrs.products });
   };
 
   fetchProductByHandle = async (handle) => {
-    // Fetch a single product by Handle
-    graphQlRequestProductSingle(client.graphQLClient, handle, productQuery).then((graphProduct) => {
-      const { productByHandle: product } = graphProduct.attrs;
-      this.setState({ product });
-    });
+    const res = await graphQlRequestProductSingle(client.graphQLClient, handle, productQuery);
+    const productData = await res;
+
+    this.setState({ product: productData.attrs.productByHandle });
+  };
+
+  fetchCollectionByHandle = async (handle) => {
+    const res = await graphQlRequestCollectionByHandle(client.graphQLClient, handle, productQuery);
+    const products = await res;
+
+    return products.attrs.collectionByHandle.products;
   };
 
   updateProducts = (product) => {
@@ -49,6 +58,7 @@ export default class ShopContextProvider extends Component {
           fetchAllProducts: this.fetchAllProducts,
           fetchProductByHandle: this.fetchProductByHandle,
           updateProducts: this.updateProducts,
+          fetchCollectionByHandle: this.fetchCollectionByHandle,
         }}
       >
         {this.props.children}

@@ -7,9 +7,9 @@ export const graphQlRequestProducts = async (client, queryCallback) => {
 
   const response = await client.send(query);
 
-  const what = await response;
+  const data = await response;
 
-  return what.model;
+  return data.model;
 };
 
 export const graphQlRequestProductSingle = async (client, handle, queryCallback) => {
@@ -21,7 +21,23 @@ export const graphQlRequestProductSingle = async (client, handle, queryCallback)
 
   const response = await client.send(query);
 
-  const what = await response;
+  const data = await response;
 
-  return what.model;
+  return data.model;
+};
+
+export const graphQlRequestCollectionByHandle = async (client, handle, queryCallback) => {
+  const query = client.query((root) => {
+    root.add('collectionByHandle', { args: { handle } }, (collection) => {
+      collection.addConnection('products', { args: { first: 99 } }, (product) => {
+        queryCallback(product);
+      });
+    });
+  });
+
+  const response = await client.send(query);
+
+  const data = await response;
+
+  return data.model;
 };

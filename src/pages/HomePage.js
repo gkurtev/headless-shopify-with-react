@@ -8,7 +8,7 @@ function HomePage() {
 
   useEffect(() => {
     fetchAllProducts();
-  }, [fetchAllProducts]);
+  }, [fetchAllProducts, products.length]);
 
   if (!products.length) return <p>...Loading</p>;
 
