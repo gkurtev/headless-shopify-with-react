@@ -7,6 +7,8 @@ function HomePage() {
   const { products, fetchAllProducts } = useContext(ShopContext);
 
   useEffect(() => {
+    if (products.length > 0) return;
+
     fetchAllProducts();
   }, [fetchAllProducts, products.length]);
 
