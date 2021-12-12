@@ -11,6 +11,7 @@ import {
   DrawerCloseButton,
 } from '@chakra-ui/react';
 import { ShopContext } from '../contexts/ShopContextProvider';
+import CartItem from './CartItem';
 
 function CartDrawer() {
   const { checkout, cartOpened, closeCart } = useContext(ShopContext);
@@ -24,7 +25,11 @@ function CartDrawer() {
 
         <DrawerBody>
           {checkout && checkout.lineItems && checkout.lineItems.length > 0 ? (
-            checkout.lineItems.map((lineItem) => <Box key={lineItem.id}>{lineItem.title}</Box>)
+            checkout.lineItems.map((lineItem) => (
+              <Box key={lineItem.id}>
+                <CartItem item={lineItem} />
+              </Box>
+            ))
           ) : (
             <Box>Your cart is currently empty</Box>
           )}
