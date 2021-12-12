@@ -2,9 +2,9 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ShopContextProvider from './contexts/ShopContextProvider';
 import HomePage from './pages/HomePage';
 import ProductPage from './pages/ProductPage';
-// 1. import `ChakraProvider` component
 import { ChakraProvider } from '@chakra-ui/react';
 import Header from './components/Header';
+import CartDrawer from './components/CartDrawer';
 
 function App() {
   return (
@@ -13,6 +13,7 @@ function App() {
         <ShopContextProvider>
           <Router>
             <Header />
+            <CartDrawer />
 
             <Routes>
               <Route path='/' element={<HomePage />} />

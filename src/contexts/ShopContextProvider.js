@@ -34,9 +34,7 @@ export default class ShopContextProvider extends Component {
   };
 
   createCheckout = async () => {
-    // Create an empty checkout
     client.checkout.create().then((checkout) => {
-      // Do something with the checkout
       this.setState({ checkout });
       localStorage.setItem('checkoutId', checkout.id);
     });
@@ -51,10 +49,9 @@ export default class ShopContextProvider extends Component {
       },
     ];
 
-    client.checkout.addLineItems(checkoutId, lineItemsToAdd).then((checkout) => {
-      console.log(checkout);
-      this.setState({ checkout });
-    });
+    const checkout = await client.checkout.addLineItems(checkoutId, lineItemsToAdd);
+
+    this.setState({ checkout });
   };
 
   fetchAllProducts = async () => {
@@ -98,6 +95,8 @@ export default class ShopContextProvider extends Component {
           updateProducts: this.updateProducts,
           fetchCollectionByHandle: this.fetchCollectionByHandle,
           addToCart: this.addToCart,
+          closeCart: this.closeCart,
+          openCart: this.openCart,
         }}
       >
         {this.props.children}

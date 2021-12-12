@@ -1,10 +1,9 @@
 import { Flex, Text, Button, Box } from '@chakra-ui/react';
-import React from 'react';
+import React, { useContext } from 'react';
+import { ShopContext } from '../contexts/ShopContextProvider';
 
 function Header() {
-  const openCart = () => {
-    console.log('opened cart');
-  };
+  const { openCart } = useContext(ShopContext);
 
   return (
     <Box>

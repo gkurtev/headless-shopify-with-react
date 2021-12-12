@@ -19,6 +19,7 @@ function ProductPage() {
     addToCart,
     fetchCollectionByHandle,
     product,
+    openCart,
     products,
     updateProducts,
     fetchProductByHandle,
@@ -120,7 +121,9 @@ function ProductPage() {
   };
 
   const handleAddToCart = () => {
-    addToCart(selectedVariant.id);
+    addToCart(selectedVariant.id).then(() => {
+      openCart();
+    });
   };
 
   if (!currentProduct) return <p>...Loading</p>;
