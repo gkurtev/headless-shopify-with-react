@@ -22,6 +22,15 @@ export default class ShopContextProvider extends Component {
     checkout: {},
     products: [],
     product: {},
+    cartOpened: false,
+  };
+
+  openCart = () => {
+    this.setState({ cartOpened: true });
+  };
+
+  closeCart = () => {
+    this.setState({ cartOpened: false });
   };
 
   createCheckout = async () => {
