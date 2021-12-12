@@ -19,8 +19,33 @@ export const ShopContext = React.createContext();
 
 export default class ShopContextProvider extends Component {
   state = {
+    checkout: {},
     products: [],
     product: {},
+  };
+
+  createCheckout = async () => {
+    // Create an empty checkout
+    client.checkout.create().then((checkout) => {
+      // Do something with the checkout
+      this.setState({ checkout });
+      localStorage.setItem('checkoutId', checkout.id);
+    });
+  };
+
+  addToCart = async (variantId, quantity = 1) => {
+    const checkoutId = localStorage.getItem('checkoutId');
+    const lineItemsToAdd = [
+      {
+        variantId,
+        quantity,
+      },
+    ];
+
+    client.checkout.addLineItems(checkoutId, lineItemsToAdd).then((checkout) => {
+      console.log(checkout);
+      this.setState({ checkout });
+    });
   };
 
   fetchAllProducts = async () => {
@@ -50,6 +75,10 @@ export default class ShopContextProvider extends Component {
     });
   };
 
+  componentDidMount() {
+    this.createCheckout();
+  }
+
   render() {
     return (
       <ShopContext.Provider
@@ -59,6 +88,7 @@ export default class ShopContextProvider extends Component {
           fetchProductByHandle: this.fetchProductByHandle,
           updateProducts: this.updateProducts,
           fetchCollectionByHandle: this.fetchCollectionByHandle,
+          addToCart: this.addToCart,
         }}
       >
         {this.props.children}

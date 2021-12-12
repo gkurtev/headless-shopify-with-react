@@ -13,23 +13,34 @@ function ProductPage() {
 
   const [colorGroupProducts, setColorGroupProducts] = useState([]);
 
-  const [selectedVariant, setSelectedVariant] = useState();
+  const [selectedVariant, setSelectedVariant] = useState({});
 
-  const { fetchCollectionByHandle, product, products, updateProducts, fetchProductByHandle } =
-    useContext(ShopContext);
+  const {
+    addToCart,
+    fetchCollectionByHandle,
+    product,
+    products,
+    updateProducts,
+    fetchProductByHandle,
+  } = useContext(ShopContext);
 
   useEffect(() => {
     const hasMatchingProduct = products.find((x) => x.handle === handle);
 
     if (hasMatchingProduct) {
+      const selectedVariant = hasMatchingProduct.variants.find(
+        (variant) => variant.availableForSale
+      );
+
       setCurrentProduct(hasMatchingProduct);
-      setSelectedVariant(hasMatchingProduct.variants.find((variant) => variant.available));
+      setSelectedVariant(selectedVariant ? selectedVariant : hasMatchingProduct.variants[0]);
       colorGroups(hasMatchingProduct);
     } else {
       fetchProductByHandle(handle).then(() => {
         if (product.handle) {
+          const selectedVariant = product.variants.find((variant) => variant.availableForSale);
           setCurrentProduct(product);
-          setSelectedVariant(product.variants.find((variant) => variant.available));
+          setSelectedVariant(selectedVariant ? selectedVariant : product.variants[0]);
           updateProducts(product);
           colorGroups(product);
         }
@@ -52,6 +63,7 @@ function ProductPage() {
 
   const changeColor = (handle) => {
     const selectedProduct = colorGroupProducts.find((x) => x.handle === handle);
+    const selectedVariant = selectedProduct.variants.find((x) => x.availableForSale);
     const sourceUrl = window.location.href;
     const lastIndex = sourceUrl.lastIndexOf('/');
     const filteredUrl = sourceUrl.slice(0, lastIndex + 1);
@@ -59,6 +71,7 @@ function ProductPage() {
     window.history.pushState({}, null, filteredUrl + handle);
 
     setCurrentProduct(selectedProduct);
+    setSelectedVariant(selectedVariant ? selectedVariant : selectedProduct.variants[0]);
   };
 
   const renderColorGroups = () => {
@@ -92,6 +105,24 @@ function ProductPage() {
     );
   };
 
+  const variantTitle = (title) => {
+    return title.includes('/') ? title.split('/')[1].trim() : title;
+  };
+
+  const changeVariant = (variantId) => {
+    setSelectedVariant(currentProduct.variants.find((x) => x.id === variantId));
+  };
+
+  const selectedSizeText = () => {
+    return selectedVariant?.title?.includes('/')
+      ? selectedVariant.title?.split('/')[1].trim()
+      : selectedVariant.title;
+  };
+
+  const handleAddToCart = () => {
+    addToCart(selectedVariant.id);
+  };
+
   if (!currentProduct) return <p>...Loading</p>;
 
   return (
@@ -113,6 +144,43 @@ function ProductPage() {
           {currentProduct.description && <Text>{currentProduct.description}</Text>}
 
           {colorGroupProducts.length > 0 && renderColorGroups()}
+
+          {currentProduct.variants.length > 1 && (
+            <Box marginTop='1rem'>
+              <Box marginBottom='1rem'>
+                <Text>Size: {selectedSizeText()}</Text>
+              </Box>
+
+              <Flex margin='-0.5rem' flexWrap='wrap'>
+                {currentProduct.variants.map((variant) => {
+                  const isActiveVariant = variant.id === selectedVariant.id;
+                  const isDisabled = !variant.availableForSale;
+                  return (
+                    <Box key={variant.id} padding='0.5rem'>
+                      <Button
+                        onClick={() => changeVariant(variant.id)}
+                        disabled={isDisabled}
+                        isActive={isActiveVariant}
+                      >
+                        {variantTitle(variant.title)}
+                      </Button>
+                    </Box>
+                  );
+                })}
+              </Flex>
+            </Box>
+          )}
+
+          <Box marginTop='2rem'>
+            <Button
+              bg='black'
+              color='white'
+              onClick={() => handleAddToCart()}
+              disabled={!selectedVariant.availableForSale}
+            >
+              {selectedVariant.availableForSale ? 'Add to cart' : 'Sold out'}
+            </Button>
+          </Box>
         </Box>
       </Flex>
     </div>
