@@ -34,14 +34,23 @@ export default class ShopContextProvider extends Component {
   };
 
   createCheckout = async () => {
+    let checkoutLocalStorage = localStorage.getItem('shopify_checkout');
+
+    if (checkoutLocalStorage) {
+      this.setState({ checkout: JSON.parse(checkoutLocalStorage) });
+
+      return;
+    }
+
     client.checkout.create().then((checkout) => {
       this.setState({ checkout });
-      localStorage.setItem('checkoutId', checkout.id);
+      this.setLocalStorageCheckout(checkout);
     });
   };
 
   addToCart = async (variantId, quantity = 1) => {
-    const checkoutId = localStorage.getItem('checkoutId');
+    const shopifyCheckout = JSON.parse(localStorage.getItem('shopify_checkout'));
+    const checkoutId = shopifyCheckout.id;
     const lineItemsToAdd = [
       {
         variantId,
@@ -52,6 +61,12 @@ export default class ShopContextProvider extends Component {
     const checkout = await client.checkout.addLineItems(checkoutId, lineItemsToAdd);
 
     this.setState({ checkout });
+
+    this.setLocalStorageCheckout(checkout);
+  };
+
+  setLocalStorageCheckout = (checkout) => {
+    localStorage.setItem('shopify_checkout', JSON.stringify(checkout));
   };
 
   fetchAllProducts = async () => {
