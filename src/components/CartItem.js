@@ -1,7 +1,23 @@
-import { Box, Flex, Image, Text } from '@chakra-ui/react';
-import React from 'react';
+import {
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
+  Box,
+  Flex,
+  Image,
+  Text,
+  CloseButton,
+} from '@chakra-ui/react';
+
+import React, { useContext } from 'react';
+import { ShopContext } from '../contexts/ShopContextProvider';
 function CartItem(props) {
   const { item } = props;
+
+  const { updateCartItems, removeCartItem } = useContext(ShopContext);
+
   return (
     <Box marginBottom='2rem'>
       <Flex>
@@ -10,9 +26,29 @@ function CartItem(props) {
         </Box>
 
         <Box w='50%'>
-          <Text>{item.title}</Text>
-          <Text>{item.quantity}</Text>
+          <Text fontWeight='bold' fontSize='1.2rem'>
+            {item.title}
+          </Text>
+
+          <Text>Quantity: {item.quantity}</Text>
+
           <Text>{item.variant.title}</Text>
+
+          <Flex>
+            <NumberInput
+              onChange={(quantity) => updateCartItems(item.id, parseInt(quantity, 10))}
+              min={0}
+              defaultValue={item.quantity}
+            >
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+
+            <CloseButton onClick={() => removeCartItem(item.id)} />
+          </Flex>
         </Box>
       </Flex>
     </Box>

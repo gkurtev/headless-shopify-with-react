@@ -48,20 +48,35 @@ export default class ShopContextProvider extends Component {
     });
   };
 
+  updateCartItems = async (id, quantity) => {
+    const checkoutId = this.state.checkout.id; // ID of an existing checkout
+    const lineItemsToUpdate = [{ id, quantity }];
+    const checkout = await client.checkout.updateLineItems(checkoutId, lineItemsToUpdate);
+
+    this.setState({ checkout });
+    this.setLocalStorageCheckout(checkout);
+  };
+
   addToCart = async (variantId, quantity = 1) => {
-    const shopifyCheckout = JSON.parse(localStorage.getItem('shopify_checkout'));
-    const checkoutId = shopifyCheckout.id;
+    const checkoutId = this.state.checkout.id;
     const lineItemsToAdd = [
       {
         variantId,
         quantity,
       },
     ];
-
     const checkout = await client.checkout.addLineItems(checkoutId, lineItemsToAdd);
 
     this.setState({ checkout });
+    this.setLocalStorageCheckout(checkout);
+  };
 
+  removeCartItem = async (variantId) => {
+    const checkoutId = this.state.checkout.id;
+    const lineItemIdsToRemove = [variantId];
+    const checkout = await client.checkout.removeLineItems(checkoutId, lineItemIdsToRemove);
+
+    this.setState({ checkout });
     this.setLocalStorageCheckout(checkout);
   };
 
@@ -105,6 +120,8 @@ export default class ShopContextProvider extends Component {
       <ShopContext.Provider
         value={{
           ...this.state,
+          updateCartItems: this.updateCartItems,
+          removeCartItem: this.removeCartItem,
           fetchAllProducts: this.fetchAllProducts,
           fetchProductByHandle: this.fetchProductByHandle,
           updateProducts: this.updateProducts,

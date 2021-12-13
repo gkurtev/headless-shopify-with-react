@@ -16,12 +16,22 @@ import CartItem from './CartItem';
 function CartDrawer() {
   const { checkout, cartOpened, closeCart } = useContext(ShopContext);
 
+  const cartCount = () => {
+    const bool = checkout && checkout.lineItems && checkout.lineItems.length > 0;
+
+    return bool
+      ? `(${checkout.lineItems.reduce((previousValue, currentValue) => {
+          return previousValue + currentValue.quantity;
+        }, 0)})`
+      : '';
+  };
+
   return (
     <Drawer isOpen={cartOpened} placement='right' onClose={closeCart} size='md'>
       <DrawerOverlay />
       <DrawerContent>
         <DrawerCloseButton />
-        <DrawerHeader>Your Cart</DrawerHeader>
+        <DrawerHeader>Your Cart {cartCount()}</DrawerHeader>
 
         <DrawerBody>
           {checkout && checkout.lineItems && checkout.lineItems.length > 0 ? (
