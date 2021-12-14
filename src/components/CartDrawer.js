@@ -52,6 +52,9 @@ function CartDrawer() {
             color='white'
             variant='outline'
             mr={3}
+            textAlign='center'
+            cursor='pointer'
+            padding='1rem 2rem'
             href={checkout.webUrl}
           >
             Checkout
