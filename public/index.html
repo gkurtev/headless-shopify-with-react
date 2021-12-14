@@ -39,5 +39,206 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+
+    <proxy-mroxy id="imgroot">
+      <div ref="formInput">
+        <add-items-form style="display: block;">
+          <form action="">
+            <input type="number" name="cartItemId" style="border: 1px solid black" placeholder="cart item id">
+
+            <textarea name="cartItemProduct" id="" cols="30" rows="10" style="border: 1px solid black" placeholder="cart item product"></textarea>
+
+            <button type="submit">Submit</button>
+          </form>
+        </add-items-form>
+      </div>
+
+      <div ref="lineItems"></div>
+    </proxy-mroxy>
+
+    <script>
+
+      const fnTest = () => {
+        console.log('fn test')
+      }
+
+      let globalCallbacks = [fnTest]
+
+      const reRenderElements = () => {
+        globalCallbacks.forEach(fn => fn())
+
+        globalCallbacks = []
+      }
+
+      const globalData = {
+        checkoutItems: [
+            {id:1, title: 'Product 1'},
+            {id: 2, title: 'Product 2'},
+            {id:3, title: 'Product 3'},
+            {id:4, title: 'Product 4'}
+          ]
+      }
+
+      const handlerMandler = {
+        set: (target,prop,value) => {
+          target[prop] = value
+          reRenderElements()
+          return true
+        },
+        get: (target,prop) => {
+          return target[prop]
+        }
+      }
+
+
+      const globalProxy = new Proxy(globalData, handlerMandler)
+
+      setTimeout(() => {
+       globalProxy.checkoutItems = [1,2,3]
+      }, 3000);
+
+      class AddItemsForm extends HTMLElement{
+        constructor(){
+          super();
+
+          this.form = this.querySelector('form')
+
+          this.form.addEventListener('submit', (event) => {
+            this.onSubmit(event)
+          })
+        }
+
+        onSubmit(e){
+          e.preventDefault();
+          const $parent = this.closest('#imgroot')
+          const formData = new FormData(this.form)
+          const eventNew = new CustomEvent('addNewItem', {detail: formData})
+
+          $parent.dispatchEvent(eventNew)
+        }
+      }
+
+      customElements.define('add-items-form', AddItemsForm)
+
+
+      class ProxyMroxy extends HTMLElement{
+        constructor(){
+          super();
+          const exampleData = {
+            checkoutItems: [
+              {id:1, title: 'Product 1'},
+              {id: 2, title: 'Product 2'},
+              {id:3, title: 'Product 3'},
+              {id:4, title: 'Product 4'}
+            ]
+          }
+
+          this.lineItemsContainer = this.querySelector('[ref="lineItems"]')
+          this.formInput = this.querySelector('[ref="formInput"]')
+          this.state = this.initProxy(exampleData)
+
+          this.handleRemovedElement();
+          this.handleAddElement();
+        }
+
+        handleAddElement(){
+          this.addEventListener('addNewItem', (payload) => {
+            const passedObj = {}
+
+            for (var pair of payload.detail.entries()) {
+                console.log(pair[0]+ ', ' + pair[1]);
+                if(pair[0] === 'cartItemId'){
+                  passedObj.id = parseInt(pair[1], 10)
+                } else {
+                  passedObj.title = pair[1]
+                }
+            }
+
+            const newObjTest = [passedObj,...this.state.checkoutItems]
+
+            this.state.checkoutItems = newObjTest
+          })
+        }
+
+        handleRemovedElement(){
+          this.addEventListener('removedItem', (payload) => {
+            const filteredMiltered = this.state.checkoutItems.filter(x => x.id !== parseInt(payload.detail, 10))
+
+            this.state.checkoutItems = filteredMiltered
+          })
+        }
+
+        initProxy(data){
+          return new Proxy(data, {
+            set: (target,prop, value) => {
+              target[prop] = value
+              this.notify()
+
+              return true;
+            },
+
+            get: (target,prop) => {
+              return target[prop]
+            }
+          })
+        }
+
+        notify(){
+          this.render();
+        }
+
+        connectedCallback(){
+          this.render();
+        }
+
+        render () {
+          let lineItems = ''
+
+          this.state.checkoutItems.forEach(checkoutItem => {
+            const item = JSON.stringify(checkoutItem)
+
+            lineItems +=  `<line-item product='${item}'></line-item>`
+          })
+
+          lineItems !== '' ? this.lineItemsContainer.innerHTML = lineItems : this.lineItemsContainer.innerHTML = '<p>cart is empty</p>'
+        }
+      }
+
+
+      customElements.define('proxy-mroxy', ProxyMroxy)
+
+      class LineItem extends HTMLElement {
+        constructor(){
+          super();
+          this.product = JSON.parse(this.getAttribute('product'))
+
+        }
+
+        connectedCallback(){
+          this.render();
+          this._addEventListeners()
+        }
+
+        _addEventListeners(){
+          this.deleteItem();
+        }
+
+        deleteItem(){
+          const deleteBtn = this.querySelector('[method-on-delete]')
+          deleteBtn.addEventListener('click', (event) => {
+            const id = event.target.dataset.id
+            const $parent = this.closest('#imgroot')
+            const eventNew = new CustomEvent('removedItem', {'detail': id})
+            $parent.dispatchEvent(eventNew)
+          })
+        }
+
+        render(){
+          this.innerHTML =  `<li>${this.product.title}  <button method-on-delete data-id="${this.product.id}" style="margin-left: 1rem; padding: 0.5rem 1rem; background: black; color: white;">x</button></li>`
+        }
+      }
+
+      customElements.define('line-item', LineItem);
+    </script>
   </body>
 </html>
